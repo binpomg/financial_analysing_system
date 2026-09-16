@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "financial-research-system"
+version = "0.1.0"
+description = "Skill-led financial research with complete-source reading and independent audit"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["jsonschema==4.23.0", "pypdf==5.0.1", "PyMuPDF==1.24.11", "openpyxl==3.1.5", "Pillow==10.4.0", "tomli==2.0.2; python_version < '3.11'"]
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.scripts]
+finresearch = "finresearch.cli:main"
+
+[tool.setuptools]
+# Run from a full source checkout, or use an editable install of that checkout.
+# A standalone wheel does not include resources/, web/, or config.json.
+packages = ["finresearch"]

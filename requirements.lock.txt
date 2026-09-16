@@ -1,0 +1,14 @@
+# Runtime dependency closure from the tested Python 3.12 environment.
+# Supported setup: a complete source checkout on Windows or Ubuntu.
+# No optional extras, package indexes, credentials, or local paths are included.
+jsonschema==4.23.0
+pypdf==5.0.1
+PyMuPDF==1.24.11
+openpyxl==3.1.5
+Pillow==10.4.0
+attrs==26.1.0
+jsonschema-specifications==2025.9.1
+referencing==0.37.0
+rpds-py==2026.6.3
+typing_extensions==4.16.0
+et_xmlfile==2.0.0

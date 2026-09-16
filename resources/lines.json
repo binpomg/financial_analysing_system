@@ -1,0 +1,9 @@
+[
+  {"id":"extraction","name":"数据结构化提取","enabled":true,"skill_path":"skills/extraction/SKILL.md","review_path":"reviews/extraction/review.md","criteria_path":"reviews/extraction/criteria.md","maturity":"uncalibrated"},
+  {"id":"financial-report","name":"上市公司财务报告分析","enabled":true,"skill_path":"skills/financial-report/SKILL.md","review_path":"reviews/financial-report/review.md","criteria_path":"reviews/financial-report/criteria.md","maturity":"uncalibrated"},
+  {"id":"industry-chain","name":"产业链影响分析","enabled":true,"skill_path":"skills/industry-chain/SKILL.md","review_path":"reviews/industry-chain/review.md","criteria_path":"reviews/industry-chain/criteria.md","maturity":"uncalibrated"},
+  {"id":"valuation","name":"自动化估值建模","enabled":true,"skill_path":"skills/valuation/SKILL.md","review_path":"reviews/valuation/review.md","criteria_path":"reviews/valuation/criteria.md","maturity":"uncalibrated"},
+  {"id":"report-factcheck","name":"研究报告纠错核查","enabled":true,"skill_path":"skills/report-factcheck/SKILL.md","review_path":"reviews/report-factcheck/review.md","criteria_path":"reviews/report-factcheck/criteria.md","maturity":"uncalibrated"},
+  {"id":"investment-memo","name":"买方投资备忘录编制","enabled":true,"skill_path":"skills/investment-memo/SKILL.md","review_path":"reviews/investment-memo/review.md","criteria_path":"reviews/investment-memo/criteria.md","maturity":"uncalibrated"},
+  {"id":"research-quality","name":"研究报告质量评估","enabled":true,"skill_path":"skills/research-quality/SKILL.md","review_path":"reviews/research-quality/review.md","criteria_path":"reviews/research-quality/criteria.md","maturity":"uncalibrated"}
+]
