@@ -132,7 +132,7 @@ def test_catalog_merge_references_multiple_approved_roots_without_copying(tmp_pa
     assert result["source_count"] == 2
     merged = load_catalog(tmp_path / "merged.json")
     assert Path(merged.source_root or "").resolve() == tmp_path.resolve()
-    assert {item.relative_path for item in merged.sources} == {
-        "first\\issuer-a.pdf",
-        "second\\issuer-b.pdf",
+    assert {Path(item.relative_path) for item in merged.sources} == {
+        Path("first") / "issuer-a.pdf",
+        Path("second") / "issuer-b.pdf",
     }
