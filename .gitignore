@@ -17,6 +17,11 @@ config.toml
 # Originals, model prompts/responses, logs and generated artifacts stay local
 runtime/
 data/
+# Only these reviewed, generated method snapshots are public package resources.
+!/finagent/data/
+/finagent/data/*
+!/finagent/data/business_specifications.v1.json
+!/finagent/data/platform_policy.v1.json
 outputs/
 logs/
 private/
@@ -29,6 +34,16 @@ private/
 *.xls
 *.docx
 *.pptx
+*.zip
+*.7z
+*.png
+*.jpg
+*.jpeg
+.finagent*/
+public_data/
+local-data/
+pilot-data/
+.tools/
 
 # Environments, packaging and caches
 .venv/

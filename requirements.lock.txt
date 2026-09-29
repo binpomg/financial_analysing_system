@@ -12,3 +12,13 @@ referencing==0.37.0
 rpds-py==2026.6.3
 typing_extensions==4.16.0
 et_xmlfile==2.0.0
+httpx==0.28.1
+httpcore==1.0.9
+h11==0.16.0
+anyio==4.15.1
+idna==3.20
+certifi==2026.7.22
+pydantic==2.13.5
+pydantic_core==2.46.5
+annotated-types==0.8.0
+typing-inspection==0.4.4

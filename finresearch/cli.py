@@ -19,7 +19,7 @@ def doctor(store, live=False):
     from urllib.parse import urlsplit
     base, key, protocol = provider.credentials()
     result = {"python": sys.version.split()[0], "project": str(PROJECT), "data_directory": str(store.root),
-              "dependencies": {name: importlib.util.find_spec(name) is not None for name in ["jsonschema", "pypdf", "fitz", "openpyxl", "PIL"]},
+              "dependencies": {name: importlib.util.find_spec(name) is not None for name in ["jsonschema", "pypdf", "fitz", "openpyxl", "PIL", "pydantic", "httpx"]},
               "credential_available": bool(base and key), "api_host": urlsplit(base).hostname, "protocol": protocol,
               "models": config["models"], "business_quality": "尚须依据各线真实校准与保留样本评价"}
     if live:
@@ -40,6 +40,10 @@ def parser():
     q = sub.add_parser("doctor", help="检查运行环境与模型配置")
     q.add_argument("--live", action="store_true", help="实际调用两种模型验证连接")
     sub.add_parser("status", help="列出业务线、资料与案例状态")
+    q = sub.add_parser("workflow", help="查看研究运行关联的 FinAgent 工作流")
+    q.add_argument("run_id")
+    q = sub.add_parser("agent", help="同一资料库中的候选审核、OCR、采集和专项业务命令")
+    q.add_argument("agent_args", nargs=argparse.REMAINDER)
     sub.add_parser("recover", help="将确证执行进程已结束的任务标为中断，保留成果，不重发模型请求")
     q = sub.add_parser("import", help="导入原件并准备所有页面")
     q.add_argument("files", nargs="+")
@@ -112,6 +116,12 @@ def parser():
 
 def dispatch(store, args):
     command = args.command
+    if command == "workflow":
+        from finagent.workbench import workflow_view
+        run = store.get("runs", args.run_id)
+        if not run.get("agent_workflow_id"):
+            return {"run_id": args.run_id, "workflow": None, "note": "历史运行或独立续审核没有关联工作流"}
+        return workflow_view(store, run["agent_workflow_id"])
     if command == "recover":
         from .lifecycle import recover_interrupted
         return {"interrupted": recover_interrupted(store)}
@@ -193,11 +203,16 @@ def main(argv=None):
     args = parser().parse_args(argv)
     store = Store(args.data_dir)
     try:
+        if args.command == "agent":
+            from finagent.cli import main as agent_main
+            with store.exclusive():
+                code = agent_main(["--state-dir", str(store.root / "agent"), *args.agent_args])
+            raise SystemExit(code)
         if args.command == "serve":
             from .web import serve
             serve(store, args.port)
             return
-        if args.command in {"status", "doctor", "collect", "campaign-status"}:
+        if args.command in {"status", "doctor", "collect", "campaign-status", "workflow"}:
             result = dispatch(store, args)
         else:
             with store.exclusive():

@@ -67,6 +67,10 @@ def recover_interrupted(store):
                           error="执行进程已结束；保留原件、已完成阶段和失败现场。未自动重新调用模型。")
             if category == "runs":
                 record["release_status"] = "blocked"
+                if record.get("agent_workflow_id"):
+                    from finagent.workbench import mark_interrupted_workflow, workflow_view
+                    mark_interrupted_workflow(store, record["agent_workflow_id"])
+                    record["agent_workflow"] = workflow_view(store, record["agent_workflow_id"])
             store.put(category, record["id"], record, replace=True)
             if category == "runs":
                 export_run(store, record)

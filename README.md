@@ -4,6 +4,10 @@
 
 已提供七条业务线：数据结构化提取、财务报告分析、产业链影响分析、估值建模、研报事实核查、投资备忘录、研究质量评估。可手工导入材料，也可按需采集公开公告，逐份开展七线研究和反馈积累。候选Skill需要独立验证与历史回归，**默认不自动晋升稳定版本**。
 
+`sanhao` 分支已整合 fork 的 FinAgent：原 CLI、网页和批次入口统一登记证据与持久工作流，复用完整原件阅读和独立模型审核。新增 PDF/XLSX/XBRL 候选解析、OCR、人工审核、冲突决议、确定性财务计算、公开数据采集与专项业务 Flow。原件共用、配置共用、成果仍在原工作台查看。具体分工、四类操作场景和能力边界见 [FinAgent 合并说明](docs/finagent-integration.md)。
+
+使用本分支请在 clone 时加 `--branch sanhao`。完整验收环境安装 `requirements.dev.lock.txt`，运行 `python -m pytest test tests -q`，覆盖原工作台、fork 及两者集成的用例。
+
 ## 安装与离线检查
 
 支持以 **Python 3.12 + 完整源码checkout** 运行。`resources/`、`web/`、`config.json` 必须与 `finresearch/` 一起保留；当前不支持通过wheel安装或只复制Python包部署。
@@ -11,11 +15,11 @@
 Windows PowerShell：
 
 ```powershell
-git clone https://github.com/binpomg/financial_analysing_system.git
+git clone --branch sanhao https://github.com/binpomg/financial_analysing_system.git
 Set-Location financial_analysing_system
 py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.lock.txt
-.\.venv\Scripts\python.exe -m unittest discover -s test -v
+.\.venv\Scripts\python.exe -m pip install -r requirements.dev.lock.txt
+.\.venv\Scripts\python.exe -m pytest test tests -q
 .\.venv\Scripts\python.exe -m finresearch doctor
 .\.venv\Scripts\python.exe -m finresearch serve --port 8765
 ```
@@ -23,19 +27,19 @@ py -3.12 -m venv .venv
 Linux Bash：
 
 ```bash
-git clone https://github.com/binpomg/financial_analysing_system.git
+git clone --branch sanhao https://github.com/binpomg/financial_analysing_system.git
 cd financial_analysing_system
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.lock.txt
-python -m unittest discover -s test -v
+python -m pip install -r requirements.dev.lock.txt
+python -m pytest test tests -q
 python -m finresearch doctor
 python -m finresearch serve --port 8765
 ```
 
-也可在完整clone后运行安装脚本：Windows用 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup.ps1`，Linux用 `bash scripts/setup.sh`。脚本创建虚拟环境并安装锁定依赖；已有环境只检查版本，不自动升级或删除。
+也可在完整clone后运行安装脚本：Windows用 `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup.ps1`，Linux用 `bash scripts/setup.sh`。脚本创建虚拟环境并安装 `requirements.lock.txt` 基础运行依赖；完整验收还需安装上述开发依赖。已有环境只检查版本，不自动升级或删除。
 
-安装依赖需要网络；测试和不带 `--live` 的 `doctor` 不调用模型，无需密钥。本次发布在Windows、Python 3.12.14下通过 **287项离线测试**，并验证全新环境安装、空资料库和工作台HTTP启动；测试时阻断外部网络连接，未调用真实模型。GitHub Actions在Windows与Ubuntu上重复验收，最新结果见仓库Actions。测试范围和历史实测限制见 [验证说明](docs/validation.md)。
+安装依赖需要网络；测试和不带 `--live` 的 `doctor` 不调用模型，无需密钥。测试时隔离模型凭据并阻断外部网络连接，未调用真实模型。GitHub Actions在Windows与Ubuntu上重复验收，最新结果见仓库Actions。本次合并的测试结果、覆盖范围和历史实测限制见 [验证说明](docs/validation.md)。
 
 打开 [本机工作台](http://127.0.0.1:8765)。未配置接口时，可以查看界面和管理本地材料，模型研究不会启动。前台服务在终端中运行，按 `Ctrl+C` 结束；需要模型调用时，先停止服务，按下节配置后在同一终端重新启动。
 

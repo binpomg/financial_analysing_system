@@ -1,0 +1,16 @@
+{
+  "schema": "finagent.xbrl-taxonomy-map.v1",
+  "mapping_id": "example-cn-gaap-core",
+  "taxonomy_version": "2026.1",
+  "entries": [
+    {
+      "namespace_uri": "https://example.test/taxonomy/cn-gaap",
+      "local_name": "Revenue",
+      "field": "revenue",
+      "unit": "iso4217:CNY",
+      "scope": "consolidated",
+      "period_type": "duration",
+      "period_kind_hint": "FY"
+    }
+  ]
+}

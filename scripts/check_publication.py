@@ -13,12 +13,15 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit, quote
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_HOSTS = {"github.com", "www.cninfo.com.cn", "static.cninfo.com.cn", "www.w3.org", "127.0.0.1", "localhost"}
+PUBLIC_HOSTS = {"github.com", "www.cninfo.com.cn", "static.cninfo.com.cn", "www.w3.org", "127.0.0.1", "localhost",
+                "data.sec.gov", "www.sec.gov", "www.gov.cn", "www.xbrl.org", "fasb.org",
+                "humanfia.ai", "jw.beijing.gov.cn"}
 URL = re.compile(r"https?://[^\s<>\"'`]+")
 TOKEN = re.compile(r"(?:\bsk-[A-Za-z0-9_-]{16,}|\b(?:gh[pousr]_|github_pat_)[A-Za-z0-9_]{20,}|\bAKIA[A-Z0-9]{16}\b|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)")
 WINDOWS_HOME = re.compile(r"[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/]", re.I)
 FORBIDDEN_PARTS = {"runtime", ".venv", "venv", "__pycache__", ".codex", ".ssh", "private", "data", "outputs", "logs"}
-FORBIDDEN_SUFFIXES = {".pem", ".key", ".p12", ".pfx", ".pyc", ".log", ".sqlite", ".db", ".pdf", ".xlsx", ".xls", ".docx", ".pptx"}
+FORBIDDEN_SUFFIXES = {".pem", ".key", ".p12", ".pfx", ".pyc", ".log", ".sqlite", ".sqlite3", ".db", ".pdf", ".xlsx", ".xls", ".docx", ".pptx", ".zip", ".7z", ".png", ".jpg", ".jpeg"}
+METHOD_SNAPSHOTS = {"finagent/data/business_specifications.v1.json", "finagent/data/platform_policy.v1.json"}
 
 
 def git(*args):
@@ -27,7 +30,10 @@ def git(*args):
 
 def forbidden_path(name):
     p = PurePosixPath(name.replace("\\", "/"))
+    if p.as_posix() in METHOD_SNAPSHOTS:
+        return False
     return (any(part in FORBIDDEN_PARTS or part.startswith('.venv') for part in p.parts)
+            or any(part.startswith('.finagent') or part in {'public_data', 'local-data', 'pilot-data', '.tools'} for part in p.parts)
             or p.name in {"config.local.json", "config.toml", ".env"}
             or (p.name.startswith('.env.') and p.name != '.env.example')
             or p.suffix.lower() in FORBIDDEN_SUFFIXES)
@@ -61,10 +67,10 @@ def inspect_bytes(data, forbidden_values=()):
     return sorted(problems)
 
 
-def inventory(staged=False, history=False):
-    if history:
+def inventory(staged=False, history=False, revision=None):
+    if history or revision:
         seen = set()
-        for line in git('rev-list', '--objects', '--all').decode().splitlines():
+        for line in git('rev-list', '--objects', revision or '--all').decode('utf-8').splitlines():
             oid, _, name = line.partition(' ')
             if oid in seen or git('cat-file', '-t', oid).strip() != b'blob':
                 continue
@@ -84,15 +90,21 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--staged', action='store_true')
     p.add_argument('--all-history', action='store_true')
+    p.add_argument('--revision', help='scan all blobs reachable from this commit/ref')
+    p.add_argument('--sensitive-env', action='store_true', help='compare sensitive process values in memory; never display them')
     p.add_argument('--deny-env', action='append', default=[], metavar='ENV_NAME')
     args = p.parse_args()
     if any(not os.environ.get(name) for name in args.deny_env):
         print(json.dumps({'success': False, 'error': 'A requested private-value environment variable is missing'}))
         return 1
     values = [os.environ[name] for name in args.deny_env]
+    if args.sensitive_env:
+        values += [value for name, value in os.environ.items() if len(value) >= 8 and
+                   (re.search(r'(?:API_KEY|TOKEN|SECRET|PASSWORD)$', name, re.I) or
+                    name in {'FIN_API_BASE_URL', 'FINAGENT_MODEL_BASE_URL', 'OPENAI_BASE_URL'})]
     findings = []
     count = 0
-    for name, data in inventory(args.staged, args.all_history):
+    for name, data in inventory(args.staged, args.all_history, args.revision):
         count += 1
         rules = inspect_bytes(data, values)
         if forbidden_path(name):

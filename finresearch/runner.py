@@ -100,6 +100,8 @@ def capture_environment(provider, config):
                     "timeout_seconds": api.get("timeout_seconds"),
                     "max_response_bytes": api.get("max_response_bytes")}
     implementation = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted((PROJECT / "finresearch").glob("*.py"))}
+    implementation.update({path.relative_to(PROJECT).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+                           for path in sorted((PROJECT / "finagent").rglob("*.py"))})
     call_code = getattr(getattr(type(provider), "call", None), "__code__", None)
     environment = {"reading": config["reading"], "implementation": implementation, "reading_rules": READING_RULES,
                    "provider_call_code": _call_code_digest(call_code) if call_code is not None else type(provider).__name__,
@@ -180,6 +182,11 @@ def export_run(store, run):
 
 
 def run_case(store, case_id, line_id="extraction", candidate_id=None, provider=None, config=None):
+    from finagent.workbench import run_case as run_workbench_case
+    return run_workbench_case(store, case_id, line_id, candidate_id, provider, config)
+
+
+def _run_skill_case(store, case_id, line_id="extraction", candidate_id=None, provider=None, config=None, *, agent_workflow_id=None, preflight_error=None):
     config = config or configuration()
     provider = provider or APIProvider(config)
     case = store.get("cases", case_id)
@@ -198,12 +205,15 @@ def run_case(store, case_id, line_id="extraction", candidate_id=None, provider=N
            "evaluation_version": digest(criteria), "auditor_version": digest(review),
            "created_at": now(), "worker_pid": os.getpid(), "status": "running", "release_status": "pending", "result": None, "audit": None}
     environment, run["model_config"] = capture_environment(provider, config)
+    run["agent_workflow_id"] = agent_workflow_id
     run["environment_digest"] = digest(environment)
     store.put("runs", run["id"], run)
     trace = store.root / "traces" / run["id"]
     write_json(trace / "frozen-context.json", {"skill": version, "review": review, "criteria": criteria, "models": config["models"], "case": case})
     write_json(trace / "environment.json", environment)
     try:
+        if preflight_error:
+            raise ValueError(preflight_error)
         units, material, images, missing = build_material(store, case, config["reading"], trace / "prepared")
         fingerprints = [{"document_id": u["document_id"], "unit_id": u["unit_id"], "text_hash": digest(u["text"]), "image_hash": hashlib.sha256(Path(u["image_path"]).read_bytes()).hexdigest() if u.get("image_path") else None} for u in units]
         run["material_digest"] = digest({"material": material, "fingerprints": fingerprints})
@@ -296,6 +306,8 @@ def resume_audit(store, previous_run_id, provider=None, config=None):
             "evaluation_eligible": False, "evaluation_exclusion_reason": "恢复复用既有业务成果，仅用于业务交付，不能计作独立晋升试验证据。"}
     run.pop("finished_at", None)
     run.pop("error", None)
+    run["agent_parent_workflow_id"] = run.pop("agent_workflow_id", None)
+    run.pop("agent_workflow", None)
     store.put("runs", run["id"], run)
     trace = store.root / "traces" / run["id"]
     resumed_frozen = {**frozen, "models": {**frozen["models"], "audit": config["models"]["audit"]}}

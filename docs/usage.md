@@ -1,6 +1,6 @@
 # 部署与使用
 
-先按 [README](../README.md) 完整clone并用Python 3.12安装 `requirements.lock.txt`。以下 `python` 均指项目虚拟环境：Windows可将它替换为 `.\.venv\Scripts\python.exe`，Linux先执行 `source .venv/bin/activate`。所有命令从仓库根目录运行。
+先按 [README](../README.md) 完整clone并用Python 3.12安装 `requirements.dev.lock.txt`（仅运行可用 `requirements.lock.txt`）。以下 `python` 均指项目虚拟环境：Windows可将它替换为 `.\.venv\Scripts\python.exe`，Linux先执行 `source .venv/bin/activate`。所有命令从仓库根目录运行。
 
 ## 在本机配置接口
 
@@ -43,7 +43,7 @@ python -m finresearch serve --port 8765
 ## 离线检查与真实调用
 
 ```text
-python -m unittest discover -s test -v
+python -m pytest test tests -q
 python -m finresearch doctor
 python -m finresearch status
 ```

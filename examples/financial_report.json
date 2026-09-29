@@ -1,0 +1,12 @@
+{
+  "schema": "finagent.financial.v1",
+  "entity_id": "demo:000001",
+  "published_at": "2026-03-31",
+  "observations": [
+    {"field": "revenue", "period_end": "2025-12-31", "period_kind": "FY", "value": "100000000", "unit": "CNY"},
+    {"field": "revenue", "period_end": "2024-12-31", "period_kind": "FY", "value": "80000000", "unit": "CNY"},
+    {"field": "net_income_parent", "period_end": "2025-12-31", "period_kind": "FY", "value": "10000000", "unit": "CNY"},
+    {"field": "net_income_parent", "period_end": "2024-12-31", "period_kind": "FY", "value": "9000000", "unit": "CNY"},
+    {"field": "operating_cash_flow", "period_end": "2025-12-31", "period_kind": "FY", "value": "12000000", "unit": "CNY"}
+  ]
+}

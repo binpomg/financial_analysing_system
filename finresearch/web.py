@@ -186,6 +186,9 @@ class Handler(BaseHTTPRequestHandler):
                 self.send(store.get("pipelines", parse_qs(target.query)["id"][0]))
             elif target.path == "/api/run":
                 run = store.get("runs", parse_qs(target.query)["id"][0])
+                if run.get("agent_workflow_id"):
+                    from finagent.workbench import workflow_view
+                    run["agent_workflow"] = workflow_view(store, run["agent_workflow_id"])
                 self.send({**run, "effective_release_status": effective_release_status(run),
                            "feedback_verifications": run_feedback_verifications(store, run["id"])})
             elif target.path == "/api/original":
